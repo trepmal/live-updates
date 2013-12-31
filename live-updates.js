@@ -21,7 +21,7 @@ jQuery(document).ready( function($) {
 			action: 'get_latest',
 			postsOnPage: postsOnPage
 		}, function( response ) {
-			console.log( response );
+			// console.log( response );
 			getLatestPostsPause = false;
 			if ( ! response.success ) return;
 			container = $('.hentry:first').parent();

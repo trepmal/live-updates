@@ -23,7 +23,6 @@ class Live_Updates {
 		add_action( 'wp_enqueue_scripts', array( &$this, 'wp_enqueue_scripts' ) );
 		add_action( 'wp_ajax_get_latest', array( &$this, 'get_latest_cb' ) );
 		add_action( 'wp_ajax_nopriv_get_latest', array( &$this, 'get_latest_cb' ) );
-
 	}
 
 	function defaults( $fetch ) {
@@ -31,9 +30,11 @@ class Live_Updates {
 			'live_updates_loop_template' => 'content.php',
 			'live_updates_interval' => 10000,
 		);
-		if ( isset( $fetch ) && isset( $options[ $fetch ] ) ) {
-			return $options[ $fetch ];
+
+		if ( isset( $fetch ) ) {
+			return isset( $options[ $fetch ] ) ? $options[ $fetch ] : '';
 		}
+
 		return $options;
 	}
 
@@ -49,11 +50,10 @@ class Live_Updates {
 		register_setting( 'reading', $field_name, 'intval' );
 		add_settings_field( "_$field_name", __('Interval (in milliseconds)', 'live-updates'), array( &$this, '_field_html' ), 'reading', 'live_update_section', $field_name );
 
-
 	}
 
 	function _field_html( $arg ) {
-		$v = get_option( $arg, '...'.$this->defaults( $arg ) );
+		$v = get_option( $arg, $this->defaults( $arg ) );
 		echo "<input type='text' name='$arg' value='$v' />";
 		if ( 'live_updates_loop_template' == $arg ) {
 			echo '<p class="description">'. __( 'A template file in the theme, or a full path to a custom template. Template should handle the display inside the loop.', 'live-updates' ) .'</p>';
@@ -71,14 +71,13 @@ class Live_Updates {
 	}
 
 	function get_latest_cb() {
-		$postsOnPage = $_POST['postsOnPage'];
-		$topmost_post = array_shift( $postsOnPage );
+		$topmost_post = array_shift( $_POST['postsOnPage'] );
 		$topmost_post = get_post( $topmost_post );
 		if ( is_null( $topmost_post ) ) {
-			wp_send_json_error( 'derp' );
+			wp_send_json_error( ); // unabled to fetch latest post on page
 		}
-		$date = date( 'Y m d G i s', strtotime( $topmost_post->post_date_gmt ) );
-		$date = array_combine( array( 'year', 'month', 'day', 'hour', 'minute', 'second' ), explode( ' ', $date ) );
+		$date = explode( ' ', date( 'Y m d G i s', strtotime( $topmost_post->post_date_gmt ) ) );
+		$date = array_combine( array( 'year', 'month', 'day', 'hour', 'minute', 'second' ), $date );
 
 		$query_args = array(
 			'date_query' => array(
@@ -90,6 +89,7 @@ class Live_Updates {
 			)
 		);
 
+		// usefull if the user has something other than chrono-ordered posts
 		$query_args = apply_filters( 'live_updates_query_args', $query_args );
 
 		$q = new WP_Query( $query_args );
@@ -104,24 +104,27 @@ class Live_Updates {
 						load_template( $template, false );
 					}
 				} else {
+					// manual template
 					echo '<div>';
 					the_title();
 					echo '<br />';
 					the_content();
 					echo '</div>';
-					// manual template
 				}
 				$html = ob_get_clean();
 			endwhile;
 		endif;
 
-		// $html = ob_get_clean();
-
 		wp_reset_postdata();
 
-		if ( empty( $html ) )
+		if ( empty( $html ) ) {
 			wp_send_json_error( 'No new posts' );
+		}
+
 		wp_send_json_success( trim($html) );
+
 	}
 
 }
+
+//eof
