@@ -63,6 +63,7 @@ class Live_Updates {
 	}
 
 	function wp_enqueue_scripts() {
+		if ( ! is_home() ) return;
 		wp_enqueue_script( 'live-updates', plugins_url( 'live-updates.js', __FILE__ ), array('jquery', 'jquery-color' ) );
 		wp_localize_script( 'live-updates', 'liveUpdates', array(
 			'ajaxUrl' => admin_url('admin-ajax.php'),
