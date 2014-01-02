@@ -40,15 +40,15 @@ class Live_Updates {
 
 	function admin_init() {
 
-		add_settings_section( 'live_update_section', 'General', '__return_empty_string', 'reading' );
+		add_settings_section( 'live_update_section', __( 'Live Updates', 'live-updates' ), '__return_empty_string', 'reading' );
 
 		$field_name = 'live_updates_loop_template';
 		register_setting( 'reading', $field_name, 'strip_tags' );
-		add_settings_field( "_$field_name", __('Template Name', 'live-updates'), array( &$this, '_field_html' ), 'reading', 'live_update_section', $field_name );
+		add_settings_field( "_$field_name", __( 'Template Name', 'live-updates' ), array( &$this, '_field_html' ), 'reading', 'live_update_section', $field_name );
 
 		$field_name = 'live_updates_interval';
 		register_setting( 'reading', $field_name, 'intval' );
-		add_settings_field( "_$field_name", __('Interval (in milliseconds)', 'live-updates'), array( &$this, '_field_html' ), 'reading', 'live_update_section', $field_name );
+		add_settings_field( "_$field_name", __( 'Interval (in milliseconds)', 'live-updates' ), array( &$this, '_field_html' ), 'reading', 'live_update_section', $field_name );
 
 	}
 
@@ -66,10 +66,10 @@ class Live_Updates {
 		if ( ! is_home() ) return;
 		wp_enqueue_script( 'live-updates', plugins_url( 'live-updates.js', __FILE__ ), array('jquery', 'jquery-color', 'editor' ), 1, true );
 		wp_localize_script( 'live-updates', 'liveUpdates', array(
-			'ajaxUrl' => admin_url('admin-ajax.php'),
-			'interval' => get_option('live_updates_interval'),
+			'ajaxUrl'    => admin_url('admin-ajax.php'),
+			'interval'   => get_option('live_updates_interval'),
 			'loadingGif' => admin_url('images/loading.gif'),
-			'security' => wp_create_nonce( 'security_nonce'),
+			'security'   => wp_create_nonce( 'security_nonce'),
 		) );
 	}
 
@@ -85,8 +85,8 @@ class Live_Updates {
 		$query_args = array(
 			'date_query' => array(
 				array(
-					'column' => 'post_date_gmt',
-					'after' => $date,
+					'column'    => 'post_date_gmt',
+					'after'     => $date,
 					'inclusive' => false,
 				)
 			)
@@ -148,12 +148,7 @@ function fep_loop_start( $query ) {
 	if ( ! is_home() ) return;
 
 	wp_enqueue_style( 'frontend-post', plugins_url('frontend-post.css', __FILE__ ) );
-	// wp_enqueue_script( 'frontend-post', plugins_url('frontend-post.js', __FILE__ ), array( 'jquery' ) );
 	wp_enqueue_script( 'live-updates' );
-	// wp_localize_script( 'live_updates', 'frontendPost', array(
-	// 	'ajaxUrl' => admin_url('admin-ajax.php'),
-	// 	'security' => wp_create_nonce( 'security_nonce')
-	// ) );
 
 	?><form id="frontend-post" method="post">
 	<p><input type="text" name="fep_title" /></p>
@@ -171,14 +166,12 @@ add_action( 'wp_ajax_fep_post', 'fep_post_cb' );
 function fep_post_cb() {
 	check_ajax_referer( 'security_nonce', 'security' ); // will die if failure
 
-	// wp_send_json_success( $_POST );
-
 	parse_str( $_POST['data'], $data );
 
 	$id = wp_insert_post( array(
-		'post_title' => htmlspecialchars( $data['fep_title'] ),
+		'post_title'   => htmlspecialchars( $data['fep_title'] ),
 		'post_content' => wp_filter_post_kses( $data['fep_content'] ),
-		'post_status' => 'publish',
+		'post_status'  => 'publish',
 	) );
 
 	if ( $id )
@@ -187,4 +180,5 @@ function fep_post_cb() {
 		wp_send_json_error( $data );
 
 }
+
 //eof
