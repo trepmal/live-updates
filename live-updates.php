@@ -29,6 +29,7 @@ class Live_Updates {
 		$options = array(
 			'live_updates_loop_template' => 'content.php',
 			'live_updates_interval' => 10000,
+			'frontend_editor' => 1,
 		);
 
 		if ( isset( $fetch ) ) {
@@ -44,15 +45,19 @@ class Live_Updates {
 
 		$field_name = 'live_updates_loop_template';
 		register_setting( 'reading', $field_name, 'strip_tags' );
-		add_settings_field( "_$field_name", __( 'Template Name', 'live-updates' ), array( &$this, '_field_html' ), 'reading', 'live_update_section', $field_name );
+		add_settings_field( "_$field_name", __( 'Template Name', 'live-updates' ), array( &$this, 'input_text' ), 'reading', 'live_update_section', $field_name );
 
 		$field_name = 'live_updates_interval';
 		register_setting( 'reading', $field_name, 'intval' );
-		add_settings_field( "_$field_name", __( 'Interval (in milliseconds)', 'live-updates' ), array( &$this, '_field_html' ), 'reading', 'live_update_section', $field_name );
+		add_settings_field( "_$field_name", __( 'Interval (in milliseconds)', 'live-updates' ), array( &$this, 'input_text' ), 'reading', 'live_update_section', $field_name );
+
+		$field_name = 'frontend_editor';
+		register_setting( 'reading', $field_name, 'intval' );
+		add_settings_field( "_$field_name", __( 'Show Frontend Editor', 'live-updates' ), array( &$this, 'input_checkbox' ), 'reading', 'live_update_section', $field_name );
 
 	}
 
-	function _field_html( $arg ) {
+	function input_text( $arg ) {
 		$v = get_option( $arg, $this->defaults( $arg ) );
 		echo "<input type='text' name='$arg' value='$v' />";
 		if ( 'live_updates_loop_template' == $arg ) {
@@ -60,6 +65,16 @@ class Live_Updates {
 		} elseif ( 'live_updates_interval' == $arg ) {
 			echo '<p class="description">'. __( 'How frequently to check for new posts. e.g. 10000 is 10 seconds', 'live-updates' ) .'</p>';
 		}
+	}
+
+	function input_checkbox( $arg ) {
+		$v = get_option( $arg, $this->defaults( $arg ) );
+		echo "<input type='checkbox' name='$arg' value='1' ". checked( $v, 1, false ) ." />";
+		// if ( 'live_updates_loop_template' == $arg ) {
+		// 	echo '<p class="description">'. __( 'A template file in the theme, or a full path to a custom template. Template should handle the display inside the loop.', 'live-updates' ) .'</p>';
+		// } elseif ( 'live_updates_interval' == $arg ) {
+		// 	echo '<p class="description">'. __( 'How frequently to check for new posts. e.g. 10000 is 10 seconds', 'live-updates' ) .'</p>';
+		// }
 	}
 
 	function wp_enqueue_scripts() {
@@ -140,7 +155,11 @@ class Live_Updates {
 ##       ##     ##  #######  ##    ##    ##    ######## ##    ## ########      ##         #######   ######     ##
 */
 
-add_action( 'loop_start', 'fep_loop_start' );
+if ( get_option( 'frontend_editor' ) ) {
+	add_action( 'loop_start', 'fep_loop_start' );
+	add_action( 'wp_ajax_fep_post', 'fep_post_cb' );
+}
+
 function fep_loop_start( $query ) {
 
 	if ( ! $query->is_main_query() ) return;
@@ -162,7 +181,6 @@ function fep_loop_start( $query ) {
 	<?php
 }
 
-add_action( 'wp_ajax_fep_post', 'fep_post_cb' );
 function fep_post_cb() {
 	check_ajax_referer( 'security_nonce', 'security' ); // will die if failure
 
