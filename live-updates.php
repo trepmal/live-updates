@@ -18,18 +18,18 @@ $live_updates = new Live_Updates();
 class Live_Updates {
 
 	function __construct() {
-		add_action( 'admin_init', array( &$this, 'admin_init' ) );
+		add_action( 'admin_init',                array( &$this, 'admin_init' ) );
 
-		add_action( 'wp_enqueue_scripts', array( &$this, 'wp_enqueue_scripts' ) );
-		add_action( 'wp_ajax_get_latest', array( &$this, 'get_latest_cb' ) );
+		add_action( 'wp_enqueue_scripts',        array( &$this, 'wp_enqueue_scripts' ) );
+		add_action( 'wp_ajax_get_latest',        array( &$this, 'get_latest_cb' ) );
 		add_action( 'wp_ajax_nopriv_get_latest', array( &$this, 'get_latest_cb' ) );
 	}
 
 	function defaults( $fetch ) {
 		$options = array(
 			'live_updates_loop_template' => 'content.php',
-			'live_updates_interval' => 10000,
-			'frontend_editor' => 1,
+			'live_updates_interval'      => 10000,
+			'frontend_editor'            => 1,
 		);
 
 		if ( isset( $fetch ) ) {
@@ -80,6 +80,7 @@ class Live_Updates {
 	function wp_enqueue_scripts() {
 		if ( ! is_home() ) return;
 		if ( get_query_var('paged') > 1 ) return;
+
 		wp_enqueue_script( 'live-updates', plugins_url( 'live-updates.js', __FILE__ ), array('jquery', 'jquery-color', 'editor' ), 1, true );
 		wp_localize_script( 'live-updates', 'liveUpdates', array(
 			'ajaxUrl'    => admin_url('admin-ajax.php'),
