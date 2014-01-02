@@ -70,7 +70,7 @@ jQuery(document).ready( function($) {
 			getLatestPosts();
 
 			// reset post form
-			fep_ed.execCommand('mceSetContent', false, '');
+			tinymce.execCommand('mceSetContent', false, '');
 			$form.find( 'input[type="text"]').val('');
 
 		}, 'json' );

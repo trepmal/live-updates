@@ -176,7 +176,7 @@ function fep_loop_start( $query ) {
 		'textarea_rows' => 5,
 	) );
 	?>
-	<p><input type="submit" value="Post" /></p>
+	<p><input type="submit" class="button" value="Post" /></p>
 	</form>
 	<?php
 }

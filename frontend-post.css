@@ -16,6 +16,9 @@
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
+#frontend-post .button {
+	border: 0;
+}
 
 /*
 ##### # #    # #   # #    #  ####  ######
