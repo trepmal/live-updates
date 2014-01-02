@@ -79,6 +79,7 @@ class Live_Updates {
 
 	function wp_enqueue_scripts() {
 		if ( ! is_home() ) return;
+		if ( get_query_var('paged') > 1 ) return;
 		wp_enqueue_script( 'live-updates', plugins_url( 'live-updates.js', __FILE__ ), array('jquery', 'jquery-color', 'editor' ), 1, true );
 		wp_localize_script( 'live-updates', 'liveUpdates', array(
 			'ajaxUrl'    => admin_url('admin-ajax.php'),
@@ -88,6 +89,9 @@ class Live_Updates {
 		) );
 	}
 
+	/**
+	 * Fetch new, unseen posts
+	 */
 	function get_latest_cb() {
 		$topmost_post = array_shift( $_POST['postsOnPage'] );
 		$topmost_post = get_post( $topmost_post );
@@ -160,11 +164,17 @@ if ( get_option( 'frontend_editor' ) ) {
 	add_action( 'wp_ajax_fep_post', 'fep_post_cb' );
 }
 
+/**
+ * Insert editor at top of loop
+ *
+ * Check for main query, capabilities, and home page.
+ */
 function fep_loop_start( $query ) {
 
 	if ( ! $query->is_main_query() ) return;
 	if ( ! current_user_can('publish_posts') ) return;
 	if ( ! is_home() ) return;
+	if ( get_query_var('paged') > 1 ) return;
 
 	wp_enqueue_style( 'frontend-post', plugins_url('frontend-post.css', __FILE__ ) );
 	wp_enqueue_script( 'live-updates' );
@@ -181,6 +191,9 @@ function fep_loop_start( $query ) {
 	<?php
 }
 
+/**
+ * Insert post
+ */
 function fep_post_cb() {
 	check_ajax_referer( 'security_nonce', 'security' ); // will die if failure
 
