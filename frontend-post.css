@@ -1,0 +1,30 @@
+#frontend-post {
+	margin: 0 0 40px;
+	padding: 20px 10px;
+	border-top: 1px solid #999;
+	border-bottom: 1px solid #999;
+}
+#frontend-post p {
+	margin: 0 0 15px;
+}
+#frontend-post p:last-child {
+	margin: 15px 0 0;
+}
+#frontend-post textarea,
+#frontend-post input[type="text"] {
+	width: 100%;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+/*
+##### # #    # #   # #    #  ####  ######
+  #   # ##   #  # #  ##  ## #    # #
+  #   # # #  #   #   # ## # #      #####
+  #   # #  # #   #   #    # #      #
+  #   # #   ##   #   #    # #    # #
+  #   # #    #   #   #    #  ####  ######
+*/
+.wp_themeSkin .mceStatusbar {
+	background: #eee;
+}

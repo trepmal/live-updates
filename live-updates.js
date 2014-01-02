@@ -24,20 +24,56 @@ jQuery(document).ready( function($) {
 			// console.log( response );
 			getLatestPostsPause = false;
 			if ( ! response.success ) return;
-			container = $('.hentry:first').parent();
+			toppost = $('.hentry:first');
+			// toppost.css('border', 'solid 2px red');
+
+			// container = $('.hentry:first').parent();
 			var newPosts = $( response.data ),
 				newPostsBg = newPosts.css('background-color');
-			newPosts.hide().css( 'background-color', 'rgba( 238, 238, 153, 0.8 )').prependTo( container ).slideDown( 'slow', function() {
+			// newPosts.hide().css( 'background-color', 'rgba( 238, 238, 153, 0.8 )').prependTo( container ).slideDown( 'slow', function() {
+			newPosts.hide().css( 'background-color', 'rgba( 238, 238, 153, 0.8 )').insertBefore( toppost ).slideDown( 'slow', function() {
 				newPosts.animate( {
 					'background-color': newPostsBg
 				});
 			});
+
 		} );
 	}
 
 	setInterval( function() {
 		if ( ! getLatestPostsPause )
-			getLatestPosts()
+			getLatestPosts();
 	}, liveUpdates.interval );
+
+	$('#frontend-post').submit( function( ev ) {
+		ev.preventDefault();
+
+		tinymce.triggerSave(); // make sure the <textarea> has val()
+
+		var $form = $(this),
+			$btn = $form.find( 'input[type="submit"]');
+
+		$btn.attr('disabled', 'disabled');
+		$btn.after( '<img src="'+ liveUpdates.loadingGif +'" />');
+		$.post( liveUpdates.ajaxUrl, {
+			action: 'fep_post',
+			security: liveUpdates.security,
+			data: $form.serialize()
+		}, function( response ) {
+
+			$btn.next('img').remove();
+			$btn.removeAttr('disabled');
+
+			console.log( response );
+			if ( ! response.success ) return;
+
+			getLatestPosts();
+
+			// reset post form
+			fep_ed.execCommand('mceSetContent', false, '');
+			$form.find( 'input[type="text"]').val('');
+
+		}, 'json' );
+	});
 
 });

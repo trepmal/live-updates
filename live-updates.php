@@ -64,10 +64,12 @@ class Live_Updates {
 
 	function wp_enqueue_scripts() {
 		if ( ! is_home() ) return;
-		wp_enqueue_script( 'live-updates', plugins_url( 'live-updates.js', __FILE__ ), array('jquery', 'jquery-color' ) );
+		wp_enqueue_script( 'live-updates', plugins_url( 'live-updates.js', __FILE__ ), array('jquery', 'jquery-color', 'editor' ), 1, true );
 		wp_localize_script( 'live-updates', 'liveUpdates', array(
 			'ajaxUrl' => admin_url('admin-ajax.php'),
 			'interval' => get_option('live_updates_interval'),
+			'loadingGif' => admin_url('images/loading.gif'),
+			'security' => wp_create_nonce( 'security_nonce'),
 		) );
 	}
 
@@ -128,4 +130,61 @@ class Live_Updates {
 
 }
 
+/*
+######## ########   #######  ##    ## ######## ######## ##    ## ########      ########   #######   ######  ########
+##       ##     ## ##     ## ###   ##    ##    ##       ###   ## ##     ##     ##     ## ##     ## ##    ##    ##
+##       ##     ## ##     ## ####  ##    ##    ##       ####  ## ##     ##     ##     ## ##     ## ##          ##
+######   ########  ##     ## ## ## ##    ##    ######   ## ## ## ##     ##     ########  ##     ##  ######     ##
+##       ##   ##   ##     ## ##  ####    ##    ##       ##  #### ##     ##     ##        ##     ##       ##    ##
+##       ##    ##  ##     ## ##   ###    ##    ##       ##   ### ##     ##     ##        ##     ## ##    ##    ##
+##       ##     ##  #######  ##    ##    ##    ######## ##    ## ########      ##         #######   ######     ##
+*/
+
+add_action( 'loop_start', 'fep_loop_start' );
+function fep_loop_start( $query ) {
+
+	if ( ! $query->is_main_query() ) return;
+	if ( ! current_user_can('publish_posts') ) return;
+	if ( ! is_home() ) return;
+
+	wp_enqueue_style( 'frontend-post', plugins_url('frontend-post.css', __FILE__ ) );
+	// wp_enqueue_script( 'frontend-post', plugins_url('frontend-post.js', __FILE__ ), array( 'jquery' ) );
+	wp_enqueue_script( 'live-updates' );
+	// wp_localize_script( 'live_updates', 'frontendPost', array(
+	// 	'ajaxUrl' => admin_url('admin-ajax.php'),
+	// 	'security' => wp_create_nonce( 'security_nonce')
+	// ) );
+
+	?><form id="frontend-post" method="post">
+	<p><input type="text" name="fep_title" /></p>
+	<?php
+	wp_editor( '', 'fep_content', array(
+		'textarea_rows' => 5,
+	) );
+	?>
+	<p><input type="submit" value="Post" /></p>
+	</form>
+	<?php
+}
+
+add_action( 'wp_ajax_fep_post', 'fep_post_cb' );
+function fep_post_cb() {
+	check_ajax_referer( 'security_nonce', 'security' ); // will die if failure
+
+	// wp_send_json_success( $_POST );
+
+	parse_str( $_POST['data'], $data );
+
+	$id = wp_insert_post( array(
+		'post_title' => htmlspecialchars( $data['fep_title'] ),
+		'post_content' => wp_filter_post_kses( $data['fep_content'] ),
+		'post_status' => 'publish',
+	) );
+
+	if ( $id )
+		wp_send_json_success( $data );
+	else
+		wp_send_json_error( $data );
+
+}
 //eof
