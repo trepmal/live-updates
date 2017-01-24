@@ -103,10 +103,11 @@ class Live_Updates {
 	 * Enqueue scripts
 	 */
 	function wp_enqueue_scripts() {
-		if ( ! is_home() ) return;
-		if ( get_query_var('paged') > 1 ) return;
+		if ( ! is_home() || get_query_var('paged') > 1 ) {
+			return;
+		}
 
-		wp_enqueue_script( 'live-updates', plugins_url( 'live-updates.js', __FILE__ ), array('jquery', 'jquery-color', 'editor' ), 1, true );
+		wp_enqueue_script( 'live-updates', plugins_url( 'live-updates.js', __FILE__ ), array( 'jquery', 'jquery-color', 'editor' ), 1, true );
 		wp_localize_script( 'live-updates', 'liveUpdates', array(
 			'ajaxUrl'    => admin_url('admin-ajax.php'),
 			'interval'   => get_option('live_updates_interval'),
@@ -169,7 +170,7 @@ class Live_Updates {
 			wp_send_json_error( 'No new posts' );
 		}
 
-		wp_send_json_success( trim($html) );
+		wp_send_json_success( trim( $html ) );
 
 	}
 
@@ -186,7 +187,7 @@ class Live_Updates {
 */
 
 if ( get_option( 'frontend_editor' ) ) {
-	add_action( 'loop_start', 'fep_loop_start' );
+	add_action( 'loop_start',       'fep_loop_start' );
 	add_action( 'wp_ajax_fep_post', 'fep_post_cb' );
 }
 
@@ -197,22 +198,27 @@ if ( get_option( 'frontend_editor' ) ) {
  */
 function fep_loop_start( $query ) {
 
-	if ( ! $query->is_main_query() ) return;
-	if ( ! current_user_can('publish_posts') ) return;
-	if ( ! is_home() ) return;
-	if ( get_query_var('paged') > 1 ) return;
+	if (
+		! $query->is_main_query() ||
+		! current_user_can('publish_posts') ||
+		! is_home() ||
+		get_query_var('paged') > 1
+	) {
+		return;
+	}
 
 	wp_enqueue_style( 'frontend-post', plugins_url('frontend-post.css', __FILE__ ) );
 	wp_enqueue_script( 'live-updates' );
 
-	?><form id="frontend-post" method="post">
-	<p><input type="text" name="fep_title" /></p>
-	<?php
-	wp_editor( '', 'fep_content', array(
-		'textarea_rows' => 5,
-	) );
 	?>
-	<p><input type="submit" class="button" value="Post" /></p>
+	<form id="frontend-post" method="post">
+		<p><input type="text" name="fep_title" /></p>
+		<?php
+			wp_editor( '', 'fep_content', array(
+				'textarea_rows' => 5,
+			) );
+		?>
+		<p><input type="submit" class="button" value="Post" /></p>
 	</form>
 	<?php
 }
@@ -231,10 +237,12 @@ function fep_post_cb() {
 		'post_status'  => 'publish',
 	) );
 
-	if ( $id )
+	if ( $id ) {
 		wp_send_json_success( $data );
-	else
+	}
+	else {
 		wp_send_json_error( $data );
+	}
 
 }
 
