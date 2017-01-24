@@ -17,6 +17,9 @@ $live_updates = new Live_Updates();
 
 class Live_Updates {
 
+	/**
+	 * Get hooked in
+	 */
 	function __construct() {
 		add_action( 'admin_init',                array( $this, 'admin_init' ) );
 
@@ -25,7 +28,13 @@ class Live_Updates {
 		add_action( 'wp_ajax_nopriv_get_latest', array( $this, 'get_latest_cb' ) );
 	}
 
-	function defaults( $fetch ) {
+	/**
+	 * Define default options
+	 *
+	 * @param string $fetch Optional, name of single option to retrieve
+	 * @return array|string|int All options as array, or single option if named
+	 */
+	function defaults( $fetch='' ) {
 		$options = array(
 			'live_updates_loop_template' => 'content.php',
 			'live_updates_interval'      => 10000,
@@ -39,6 +48,9 @@ class Live_Updates {
 		return $options;
 	}
 
+	/**
+	 * Set up options fields
+	 */
 	function admin_init() {
 
 		add_settings_section( 'live_update_section', __( 'Live Updates', 'live-updates' ), '__return_empty_string', 'reading' );
@@ -57,6 +69,11 @@ class Live_Updates {
 
 	}
 
+	/**
+	 * Display option field
+	 *
+	 * @param string $arg Field name
+	 */
 	function input_text( $arg ) {
 		$v = get_option( $arg, $this->defaults( $arg ) );
 		echo "<input type='text' name='$arg' value='$v' />";
@@ -67,6 +84,11 @@ class Live_Updates {
 		}
 	}
 
+	/**
+	 * Display option field
+	 *
+	 * @param string $arg Field name
+	 */
 	function input_checkbox( $arg ) {
 		$v = get_option( $arg, $this->defaults( $arg ) );
 		echo "<input type='checkbox' name='$arg' value='1' ". checked( $v, 1, false ) ." />";
@@ -77,6 +99,9 @@ class Live_Updates {
 		// }
 	}
 
+	/**
+	 * Enqueue scripts
+	 */
 	function wp_enqueue_scripts() {
 		if ( ! is_home() ) return;
 		if ( get_query_var('paged') > 1 ) return;
