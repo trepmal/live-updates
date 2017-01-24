@@ -18,11 +18,11 @@ $live_updates = new Live_Updates();
 class Live_Updates {
 
 	function __construct() {
-		add_action( 'admin_init',                array( &$this, 'admin_init' ) );
+		add_action( 'admin_init',                array( $this, 'admin_init' ) );
 
-		add_action( 'wp_enqueue_scripts',        array( &$this, 'wp_enqueue_scripts' ) );
-		add_action( 'wp_ajax_get_latest',        array( &$this, 'get_latest_cb' ) );
-		add_action( 'wp_ajax_nopriv_get_latest', array( &$this, 'get_latest_cb' ) );
+		add_action( 'wp_enqueue_scripts',        array( $this, 'wp_enqueue_scripts' ) );
+		add_action( 'wp_ajax_get_latest',        array( $this, 'get_latest_cb' ) );
+		add_action( 'wp_ajax_nopriv_get_latest', array( $this, 'get_latest_cb' ) );
 	}
 
 	function defaults( $fetch ) {
@@ -45,15 +45,15 @@ class Live_Updates {
 
 		$field_name = 'live_updates_loop_template';
 		register_setting( 'reading', $field_name, 'strip_tags' );
-		add_settings_field( "_$field_name", __( 'Template Name', 'live-updates' ), array( &$this, 'input_text' ), 'reading', 'live_update_section', $field_name );
+		add_settings_field( "_$field_name", __( 'Template Name', 'live-updates' ), array( $this, 'input_text' ), 'reading', 'live_update_section', $field_name );
 
 		$field_name = 'live_updates_interval';
 		register_setting( 'reading', $field_name, 'intval' );
-		add_settings_field( "_$field_name", __( 'Interval (in milliseconds)', 'live-updates' ), array( &$this, 'input_text' ), 'reading', 'live_update_section', $field_name );
+		add_settings_field( "_$field_name", __( 'Interval (in milliseconds)', 'live-updates' ), array( $this, 'input_text' ), 'reading', 'live_update_section', $field_name );
 
 		$field_name = 'frontend_editor';
 		register_setting( 'reading', $field_name, 'intval' );
-		add_settings_field( "_$field_name", __( 'Show Frontend Editor', 'live-updates' ), array( &$this, 'input_checkbox' ), 'reading', 'live_update_section', $field_name );
+		add_settings_field( "_$field_name", __( 'Show Frontend Editor', 'live-updates' ), array( $this, 'input_checkbox' ), 'reading', 'live_update_section', $field_name );
 
 	}
 
